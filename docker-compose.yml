@@ -1,0 +1,23 @@
+
+services:
+    base: &python
+      build:
+        dockerfile: .compose/kilimo/Dockerfile
+        context: .
+      develop:
+        watch:
+          - path: .
+            action: sync
+            target: /app
+
+    pipelines:
+      <<: *python
+
+    ml_training:
+      <<: *python
+
+    api:
+      <<: *python
+      ports:
+        - "8000:8000"
+      command: "fastapi dev --host 0.0.0.0 --port 8000 --reload main.py"

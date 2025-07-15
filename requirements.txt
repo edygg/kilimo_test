@@ -1,0 +1,4 @@
+fastapi[standard]
+pytest==8.4.1
+greenlet
+click==8.2.1
