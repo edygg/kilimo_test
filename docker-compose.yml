@@ -9,9 +9,12 @@ services:
           - path: .
             action: sync
             target: /app
+      volumes:
+        - "./.data:/.data"
 
     pipelines:
       <<: *python
+      command: "python data_pipeline.py"
 
     ml_training:
       <<: *python
