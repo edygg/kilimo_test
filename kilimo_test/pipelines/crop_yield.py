@@ -9,12 +9,12 @@ from uuid import uuid4
 from typing import Optional
 
 
-
 CROP_YIELD_FILE_URLS = [
     "https://www.kaggle.com/api/v1/datasets/download/patelris/crop-yield-prediction-dataset"
 ]
 
-LOCAL_DIR_STORAGE = "/.data"
+
+LOCAL_DIR_STORAGE = os.getenv("LOCAL_DIR_STORAGE") or "/.data"
 
 
 def get_crop_yield_files_urls():
@@ -147,3 +147,7 @@ def store_crop_yield_data(df: pd.DataFrame, storage_dir: str):
     file_path = os.path.join(storage_dir, "crop_yield_processed.parquet")
     df.to_parquet(file_path, index=False)
     return file_path
+
+
+def get_crop_yield_processed_data(storage_dir: str):
+    return pd.read_parquet(os.path.join(storage_dir, "crop_yield_processed.parquet"))
