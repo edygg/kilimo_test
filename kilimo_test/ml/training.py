@@ -20,13 +20,29 @@ def get_models_local_storage():
     return MODELS_LOCAL_STORAGE
 
 
-def save_corr_matrix(df: pd.DataFrame, storage_dir: str):
+def df_label_encoded(df: pd.DataFrame):
     categorical_columns = df.select_dtypes(include=['category']).columns.tolist()
     label_encoder = LabelEncoder()
+    df_copy = df.copy(deep=True)
+
+    all_categories = np.concatenate(
+        [df_copy[column].unique() for column in categorical_columns]
+    )
+    label_encoder.fit(all_categories)
 
     for column in categorical_columns:
-        df[column] = label_encoder.fit_transform(df[column])
+        df_copy[column] = label_encoder.transform(df_copy[column])
 
+    return label_encoder, df_copy
+
+
+def save_label_encoder(label_encoder, storage_dir: str):
+    file_path = os.path.join(storage_dir, "label_encoder.pkl")
+    with open(file_path, "wb") as f:
+        pickle.dump(label_encoder, f, pickle.HIGHEST_PROTOCOL)
+
+
+def save_corr_matrix(df: pd.DataFrame, storage_dir: str):
     plt.figure(figsize=(10, 8))
     sns.heatmap(df.corr(), annot=True, cmap='PuOr')
     plt.tight_layout()

@@ -1,7 +1,8 @@
 import click
 
 from kilimo_test.ml.training import save_corr_matrix, get_models_local_storage, get_training_and_test_sets, \
-    training_random_forest_model, training_linear_regression_model, save_metrics_for_models, save_model_to_pkl
+    training_random_forest_model, training_linear_regression_model, save_metrics_for_models, save_model_to_pkl, \
+    df_label_encoded, save_label_encoder
 from kilimo_test.pipelines.crop_yield import get_crop_yield_processed_data, get_local_dir_storage
 from kilimo_test.logging import logger
 
@@ -13,13 +14,20 @@ def execute_ml_training():
         storage_dir=get_local_dir_storage()
     )
     logger.info("%s", crop_yield_df.info(verbose=True))
+
+    label_encoder, crop_yield_encoded_df = df_label_encoded(crop_yield_df)
+    save_label_encoder(
+        label_encoder,
+        get_models_local_storage()
+    )
+
     save_corr_matrix(
-        crop_yield_df,
+        crop_yield_encoded_df,
         get_models_local_storage()
     )
 
     logger.info("Getting training and test sets")
-    x_train, x_test, y_train, y_test = get_training_and_test_sets(crop_yield_df)
+    x_train, x_test, y_train, y_test = get_training_and_test_sets(crop_yield_encoded_df)
 
     logger.info("Training random forest model")
     rf_model = training_random_forest_model(
