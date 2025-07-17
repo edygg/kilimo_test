@@ -106,6 +106,55 @@ El endpoint principal de la API es `/predict`, que permite predecir el rendimien
 
 El endpoint procesa estos datos utilizando el modelo especificado y devuelve un objeto JSON que incluye todos los parámetros de entrada más el campo `hg_ha_yield`, que representa el rendimiento predicho en hectogramos por hectárea.
 
+## Explicación de los resultados
+### Qué métrica tomar de referencia?
+RMSE (Root Mean Squared Error) – RECOMENDADA
+- Funciona cuando los errores grandes son importantes
+- Usa las unidades finales de la variable a predecir (en este caso hg/ha) lo que facilita la interpretación
+- Penaliza los errores grandes, donde en un contexto agrícola podría afectar debido a la precisión necesaria para tomar decisiones (variables sensibles como alimentos/temperatura/clima)
+- Más realista para impactos en producción agrícola.
+
+MAE (Mean Absolute Error)
+- Da una idea clara del promedio de error en las predicciones, sin exagerar los errores grandes.
+- Al no penalizar los errores grandes podría subestimar la producción
+
+R^2 (Coeficiente de determinación)
+- Bueno para tener una visión general del modelo, pero no indica que tan mal se esta equivocando en valor absoluto.
+
+### Interpretación de resultados
+MSE (Mean Squared Error)
+Error cuadrático promedio entre las predicciones y los valores reales. 
+Penaliza más los errores grandes (porque eleva al cuadrado).
+- Random Forest: ~103 millones -> mucho menor error.
+- Regresión Lineal: ~6,600 millones → muy alto, lo que sugiere un mal ajuste del modelo.
+
+RMSE (Root Mean Squared Error)
+Raíz cuadrada del MSE, por tanto, está en la misma unidad que la variable objetivo (hg/ha). 
+Se interpreta como el error promedio en las predicciones.
+- Random Forest: ~10,182 -> significa que en promedio se equivoca por unas 10,182 unidades de rendimiento.
+-Regresión Lineal: ~81,502 → mucho más error, casi 8 veces mayor que el modelo Random Forest.
+
+MAE (Mean Absolute Error)
+Error absoluto promedio.
+Es más robusto que el MSE ante valores atípicos (outliers).
+- El menor valor es mejor
+
+R2 (R-squared / Coeficiente de Determinación)
+Mide qué tan bien el modelo explica la variabilidad del target.
+Rango: de -∞ a 1. Mientras más cerca de 1, mejor.
+- Random Forest: 0.9857 -> excelente, el modelo explica el 98.57% de la variación en el rendimiento.
+- Regresión Lineal: 0.0843 -> malo, apenas explica el 8.4% de la variabilidad.
+
+### Conclusión
+Random Forest es claramente superior porque:
+Tiene muchísimo menor error (MSE, RMSE y MAE).
+Tiene un R^2 cercano a 1 (0.9857), lo que indica que casi toda la variación en el rendimiento se está explicando por las variables del modelo.
+
+Regresión Lineal falla porque:
+Supone una relación lineal entre las variables independientes y el rendimiento.
+En problemas agrícolas reales, las relaciones son no lineales y complejas (por ejemplo, más pesticida no siempre implica más rendimiento, puede tener un efecto inverso).
+Tiene errores muy grandes y no explica casi nada de la variabilidad del rendimiento (R^2 = 0.08).
+
 ### Nota sobre la Documentación
 
-Esta documentación fue escrita utilizando agentes de IA para facilitar la explicación del proyecto y su estructura. Sin embargo, es importante destacar que todo el código del proyecto fue generado por humanos. Los agentes de IA solo se utilizaron como herramienta para crear esta documentación clara y detallada, mientras que la implementación técnica, incluyendo el pipeline de datos, los modelos de machine learning y la API REST, fue desarrollada íntegramente por programadores humanos.
+Esta documentación fue escrita utilizando agentes de IA para facilitar la explicación del proyecto y su estructura. Sin embargo, es importante destacar que todo el código del proyecto fue generado por Edilson Gonzalez. Los agentes de IA solo se utilizaron como herramienta para crear esta documentación clara y detallada, mientras que la implementación técnica, incluyendo el pipeline de datos, los modelos de machine learning y la API REST, fue desarrollada íntegramente por Edilson Gonzalez.
